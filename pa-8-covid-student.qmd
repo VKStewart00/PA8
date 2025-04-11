@@ -101,7 +101,7 @@ cases |>
   mutate(date = ymd(date),
          month = month(date, label = TRUE, abbr = FALSE),
          year = year(date)) |> 
-  unite(year, date)
+  unite(col = "month/year", c(month, year))
 ```
 
 
