@@ -207,7 +207,7 @@ california_covid_deaths|>
   coord_flip()
 
 
-  ggsave("Question3.png")
+  ### ggsave("Question3.png")
   
 ```
 
