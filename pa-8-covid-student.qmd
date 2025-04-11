@@ -19,6 +19,7 @@ execute:
 #| include: false
 library(tidyverse)
 library(scales) #can make nicer axis labels for graphs
+library(forcats)
 ```
 
 
@@ -96,13 +97,15 @@ Below is some code that can help you get started with the process of working wit
 
 ```{r}
 #| label: calculate-totals-month
-new_df <- cases |> 
+california_covid <- cases |> 
   filter(state == "California") |> 
   mutate(date = ymd(date),
          month = month(date, label = TRUE, abbr = FALSE),
          year = year(date)) |> 
-  unite(col = "m", c(month, year)) |>
-  select(state, m, cases_daily)
+  unite(col = "month_year", c(month, year)) |>
+  select(state, month_year, cases_daily)|>
+  group_by(month_year)|>
+  summarise(cases_daily = sum(cases_daily) )
   
 ```
 
@@ -110,11 +113,18 @@ new_df <- cases |>
 #| label: month-findings
 # view(new_df)
 
-new_df |> 
-  ggplot(aes(x = m, 
-             y = cases_daily)) +
+california_covid |>
+   ggplot(aes(x = fct_reorder(month_year, my(month_year)), 
+              y = cases_daily))+
   geom_col() + 
-  coord_flip()
+  coord_flip()+
+  labs( x = "Month and year",
+        y = "Cases",
+        title = "Covid numbers in California")
+  
+  
+  
+  
   
 ```
 
@@ -136,6 +146,18 @@ Create a graph that maps the number of cases in California in 2021 only. Be sure
 ```{r}
 #| label: ca-2021-covid
 
+california_covid|>
+  separate(month_year, c("Month", "Year"))|>
+  filter(Year == 2021)|>
+  ggplot( aes( x = Month,
+               y = cases_daily))+
+  geom_col()+
+  labs( x = "Months in the year 2021",
+        y = "Cases Count",
+        title = "Covid numbers in California")+
+  coord_flip()
+
+
 ```
 
 
@@ -143,7 +165,7 @@ Create a graph that maps the number of cases in California in 2021 only. Be sure
 
 **Which month in 2021 had the fewest number of cases in California?**
 
->Insert Answer Here
+> January 2021
 
 <!-- Swap roles -- Developer becomes Coder, Coder becomes Developer! -->
 
@@ -151,3 +173,41 @@ Create a graph that maps the number of cases in California in 2021 only. Be sure
 ### Create your own graph
 
 Using the COVID-19 data, create your graph to answer you own research question. You will submit that graph as png file in your Canvas quiz. Include your research question as the subtitle of the graph.  
+
+
+
+```{r}
+#| label: "California Covid Deaths"
+
+
+california_covid_deaths <- cases |> 
+  filter(state == "California") |> 
+  mutate(date = ymd(date),
+         month = month(date, label = TRUE, abbr = FALSE),
+         year = year(date)) |> 
+  unite(col = "month_year", c(month, year)) |>
+  select(state, month_year, deaths_daily)|>
+  group_by(month_year)|>
+  summarise(deaths = sum(deaths_daily))
+```
+
+```{r}
+#| label: "Covid Death Graphs"
+california_covid_deaths|>
+  separate(month_year, c("Month", "Year"))|>
+  filter( Year == 2021)|>
+  
+   ggplot(aes(x = Month, 
+              y = deaths))+
+  geom_col() + 
+  labs( x = "Months in the year 2021",
+        y = "Deaths Count",
+        title = "Covid deaths in California",
+        subtitle = " Which month in the year 2021 had the most covid deaths?")+
+  coord_flip()
+
+
+  ggsave("Question3.png")
+  
+```
+
