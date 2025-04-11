@@ -96,20 +96,33 @@ Below is some code that can help you get started with the process of working wit
 
 ```{r}
 #| label: calculate-totals-month
-cases |> 
+new_df <- cases |> 
   filter(state == "California") |> 
   mutate(date = ymd(date),
          month = month(date, label = TRUE, abbr = FALSE),
          year = year(date)) |> 
-  unite(col = "month/year", c(month, year))
+  unite(col = "m", c(month, year)) |>
+  select(state, m, cases_daily)
+  
 ```
 
+```{r}
+#| label: month-findings
+# view(new_df)
+
+new_df |> 
+  ggplot(aes(x = m, 
+             y = cases_daily)) +
+  geom_col() + 
+  coord_flip()
+  
+```
 
 #### Canvas Quiz Question 1
 
 **Which Month in California had the most COVID-19 cases between January 2020 and March 2023?**
 
->Insert Answer Here
+> Januaray 2022
 
 
 <!-- Swap roles -- Developer becomes Coder, Coder becomes Developer! -->
